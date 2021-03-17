@@ -9,16 +9,16 @@ tubes     <- read_csv('https://raw.githubusercontent.com/JimShady/TubeAir/master
 
 thames   <- st_read('https://raw.githubusercontent.com/KCL-ERG/useful_geography/master/thames.geojson')
 
-northern  <- filter(tubes, line == 'Northern')
+central  <- filter(tubes, line == 'Central')
 
-northern  <- st_buffer(northern, 500) %>%
+central  <- st_buffer(central, 500) %>%
               st_transform(4326)
 
-for (i in 1:nrow(northern)) {
+for (i in 1:nrow(central)) {
   
   message(glue("Done {i}"))
   
-  a_station <- northern[i,]
+  a_station <- central[i,]
   
   buildings  <- opq(bbox = st_bbox(a_station)) %>% 
     add_osm_feature(key = 'building') %>%
@@ -38,13 +38,14 @@ for (i in 1:nrow(northern)) {
   
   plot <- ggplot() +
     geom_sf(data=st_buffer(st_transform(a_station,27700),2)) +
-    geom_sf(data = buildings, col = NA, fill = 'black') +
+    geom_sf(data = buildings, col = NA, fill = 'red') +
     geom_sf(data = roads) +
     theme(axis.line = element_blank(),
           panel.background = element_blank(),
           axis.text = element_blank(),
           axis.ticks = element_blank(),
-          plot.title = element_text(hjust = 0.5, size = 36)) +
+          plot.title = element_text(hjust = 0.5, size = 36,colour='red'),
+          ) +
     ggtitle(toupper(a_station$name))
   
   png(glue("{i}_.png"), width=500, height=500)
@@ -57,4 +58,4 @@ for (i in 1:nrow(northern)) {
 }
 
 system("cmd.exe", 
-       input = glue('cd {getwd()} && "C:\\Program Files\\ImageMagick-7.0.10-Q16-HDRI\\magick" convert -delay 80 *.gif -loop 0 animation.gif'))
+       input = glue('cd {getwd()} && "C:\\Program Files\\ImageMagick-7.0.10-Q16-HDRI\\magick" convert -delay 80 *.gif -loop 0 central.gif'))
